@@ -1,104 +1,104 @@
-#include <vector>
+#include <iostream>
+#include <chrono>
+#include <random>
+#include <algorithm>
 using namespace std;
 
 //bubbleSort
-
-void bubbleSort(vector<int>& arr) {
-    int n = arr.size();
-    for (int i = 0; i < n - 1; ++i) {
-        for (int j = 0; j < n - i - 1; ++j) {
-            if (arr[j] > arr[j + 1]) {
-                swap(arr[j], arr[j + 1]);
+void bubbleSort(int arr[], int n) {
+    for (int i = 0; i < n-1; i++) {
+        for (int j = 0; j < n-i-1; j++) {
+            if (arr[j] > arr[j+1]) {
+                swap(arr[j], arr[j+1]);
             }
         }
     }
 }
 
-
 //insertionSort
-
-void insertionSort(vector<int>& arr) {
-    int n = arr.size();
-    for (int i = 1; i < n; ++i) {
+void insertionSort(int arr[], int n) {
+    for (int i = 1; i < n; i++) {
         int key = arr[i];
         int j = i - 1;
         while (j >= 0 && arr[j] > key) {
             arr[j + 1] = arr[j];
-            --j;
+            j = j - 1;
         }
         arr[j + 1] = key;
     }
 }
 
-
 //selectionSort
-
-void selectionSort(vector<int>& arr) {
-    int n = arr.size();
-    for (int i = 0; i < n - 1; ++i) {
-        int minIdx = i;
-        for (int j = i + 1; j < n; ++j) {
-            if (arr[j] < arr[minIdx]) {
-                minIdx = j;
+void selectionSort(int arr[], int n) {
+    for (int i = 0; i < n-1; i++) {
+        int min_idx = i;
+        for (int j = i+1; j < n; j++) {
+            if (arr[j] < arr[min_idx]) {
+                min_idx = j;
             }
         }
-        swap(arr[i], arr[minIdx]);
+        swap(arr[min_idx], arr[i]);
     }
 }
 
-//selectionSort
-
-void merge(vector<int>& arr, int left, int mid, int right) {
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
-    vector<int> L(n1), R(n2);
-
-    for (int i = 0; i < n1; ++i)
-        L[i] = arr[left + i];
-    for (int i = 0; i < n2; ++i)
-        R[i] = arr[mid + 1 + i];
-
-    int i = 0, j = 0, k = left;
+//mergeSort
+void merge(int arr[], int l, int m, int r) {
+    int n1 = m - l + 1;
+    int n2 = r - m;
+    int L[n1], R[n2];
+    for (int i = 0; i < n1; i++) {
+        L[i] = arr[l + i];
+    }
+    for (int j = 0; j < n2; j++) {
+        R[j] = arr[m + 1 + j];
+    }
+    int i = 0, j = 0, k = l;
     while (i < n1 && j < n2) {
         if (L[i] <= R[j]) {
-            arr[k++] = L[i++];
+            arr[k] = L[i];
+            i++;
         } else {
-            arr[k++] = R[j++];
+            arr[k] = R[j];
+            j++;
         }
+        k++;
     }
     while (i < n1) {
-        arr[k++] = L[i++];
+        arr[k] = L[i];
+        i++;
+        k++;
     }
     while (j < n2) {
-        arr[k++] = R[j++];
+        arr[k] = R[j];
+        j++;
+        k++;
     }
 }
 
-void mergeSort(vector<int>& arr, int left, int right) {
-    if (left < right) {
-        int mid = left + (right - left) / 2;
-        mergeSort(arr, left, mid);
-        mergeSort(arr, mid + 1, right);
-        merge(arr, left, mid, right);
+void mergeSort(int arr[], int l, int r) {
+    if (l < r) {
+        int m = l + (r - l) / 2;
+        mergeSort(arr, l, m);
+        mergeSort(arr, m + 1, r);
+        merge(arr, l, m, r);
     }
 }
-
 
 //quickSort
-
-int partition(vector<int>& arr, int low, int high) {
+int partition(int arr[], int low, int high) {
     int pivot = arr[high];
-    int i = low - 1;
-    for (int j = low; j < high; ++j) {
+    int i = (low - 1);
+    for (int j = low; j <= high - 1; j++) {
         if (arr[j] < pivot) {
-            swap(arr[++i], arr[j]);
+            i++;
+            swap(arr[i], arr[j]);
         }
     }
     swap(arr[i + 1], arr[high]);
-    return i + 1;
+    return (i + 1);
 }
 
-void quickSort(vector<int>& arr, int low, int high) {
+void quickSort(int arr[], int low, int high) {
     if (low < high) {
         int pi = partition(arr, low, high);
         quickSort(arr, low, pi - 1);
@@ -115,7 +115,7 @@ void measureTime(void (*sortFunc)(int[], int), int arr[], int n) {
     cout << duration.count() << " µs" << endl;
 }
 
-//overload mergeSort dan quickSort
+//mergeSort dan quickSort ooverload
 void measureTime(void (*sortFunc)(int[], int, int), int arr[], int l, int r) {
     auto start = chrono::high_resolution_clock::now();
     sortFunc(arr, l, r);
@@ -157,7 +157,7 @@ int main() {
         
         cout << "N = " << n << endl;
 
-        // data acak
+        // ddata acak
         generateRandomData(arr, n);
         cout << "Bubble Sort (Random Data): ";
         measureTime(bubbleSort, arr, n);
@@ -199,7 +199,7 @@ int main() {
         cout << "Quick Sort (Reversed Data): ";
         measureTime(quickSort, arr, 0, n - 1);
 
-        // data terurut
+        // Data terurut
         generateSortedData(arr, n);
         cout << "Bubble Sort (Sorted Data): ";
         measureTime(bubbleSort, arr, n);
@@ -226,5 +226,4 @@ int main() {
     return 0;
 }
 
-
-
+//Muhammad Hafiz Adam
