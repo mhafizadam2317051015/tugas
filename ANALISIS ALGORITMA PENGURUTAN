@@ -1,0 +1,230 @@
+#include <vector>
+using namespace std;
+
+//bubbleSort
+
+void bubbleSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 0; i < n - 1; ++i) {
+        for (int j = 0; j < n - i - 1; ++j) {
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+            }
+        }
+    }
+}
+
+
+//insertionSort
+
+void insertionSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 1; i < n; ++i) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            --j;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+
+//selectionSort
+
+void selectionSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 0; i < n - 1; ++i) {
+        int minIdx = i;
+        for (int j = i + 1; j < n; ++j) {
+            if (arr[j] < arr[minIdx]) {
+                minIdx = j;
+            }
+        }
+        swap(arr[i], arr[minIdx]);
+    }
+}
+
+//selectionSort
+
+void merge(vector<int>& arr, int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+    vector<int> L(n1), R(n2);
+
+    for (int i = 0; i < n1; ++i)
+        L[i] = arr[left + i];
+    for (int i = 0; i < n2; ++i)
+        R[i] = arr[mid + 1 + i];
+
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            arr[k++] = L[i++];
+        } else {
+            arr[k++] = R[j++];
+        }
+    }
+    while (i < n1) {
+        arr[k++] = L[i++];
+    }
+    while (j < n2) {
+        arr[k++] = R[j++];
+    }
+}
+
+void mergeSort(vector<int>& arr, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
+}
+
+
+//quickSort
+
+int partition(vector<int>& arr, int low, int high) {
+    int pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; ++j) {
+        if (arr[j] < pivot) {
+            swap(arr[++i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void quickSort(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+//mengukur waktu eksekusi
+void measureTime(void (*sortFunc)(int[], int), int arr[], int n) {
+    auto start = chrono::high_resolution_clock::now();
+    sortFunc(arr, n);
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double, micro> duration = end - start;
+    cout << duration.count() << " µs" << endl;
+}
+
+//overload mergeSort dan quickSort
+void measureTime(void (*sortFunc)(int[], int, int), int arr[], int l, int r) {
+    auto start = chrono::high_resolution_clock::now();
+    sortFunc(arr, l, r);
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double, micro> duration = end - start;
+    cout << duration.count() << " µs" << endl;
+}
+
+//membuat data acak
+void generateRandomData(int arr[], int n) {
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> dis(1, n);
+    for (int i = 0; i < n; i++) {
+        arr[i] = dis(gen);
+    }
+}
+
+//membuat data terurut terbalik
+void generateReversedData(int arr[], int n) {
+    for (int i = 0; i < n; i++) {
+        arr[i] = n - i;
+    }
+}
+
+//membuat data yang sudah terurut
+void generateSortedData(int arr[], int n) {
+    for (int i = 0; i < n; i++) {
+        arr[i] = i + 1;
+    }
+}
+
+int main() {
+    const int sizes[] = {10, 100, 500, 1000, 10000};
+    const int numSizes = sizeof(sizes) / sizeof(sizes[0]);
+    for (int i = 0; i < numSizes; i++) {
+        int n = sizes[i];
+        int* arr = new int[n];
+        
+        cout << "N = " << n << endl;
+
+        // data acak
+        generateRandomData(arr, n);
+        cout << "Bubble Sort (Random Data): ";
+        measureTime(bubbleSort, arr, n);
+
+        generateRandomData(arr, n);
+        cout << "Insertion Sort (Random Data): ";
+        measureTime(insertionSort, arr, n);
+
+        generateRandomData(arr, n);
+        cout << "Selection Sort (Random Data): ";
+        measureTime(selectionSort, arr, n);
+
+        generateRandomData(arr, n);
+        cout << "Merge Sort (Random Data): ";
+        measureTime(mergeSort, arr, 0, n - 1);
+
+        generateRandomData(arr, n);
+        cout << "Quick Sort (Random Data): ";
+        measureTime(quickSort, arr, 0, n - 1);
+
+        // data terurut terbalik
+        generateReversedData(arr, n);
+        cout << "Bubble Sort (Reversed Data): ";
+        measureTime(bubbleSort, arr, n);
+
+        generateReversedData(arr, n);
+        cout << "Insertion Sort (Reversed Data): ";
+        measureTime(insertionSort, arr, n);
+
+        generateReversedData(arr, n);
+        cout << "Selection Sort (Reversed Data): ";
+        measureTime(selectionSort, arr, n);
+
+        generateReversedData(arr, n);
+        cout << "Merge Sort (Reversed Data): ";
+        measureTime(mergeSort, arr, 0, n - 1);
+
+        generateReversedData(arr, n);
+        cout << "Quick Sort (Reversed Data): ";
+        measureTime(quickSort, arr, 0, n - 1);
+
+        // data terurut
+        generateSortedData(arr, n);
+        cout << "Bubble Sort (Sorted Data): ";
+        measureTime(bubbleSort, arr, n);
+
+        generateSortedData(arr, n);
+        cout << "Insertion Sort (Sorted Data): ";
+        measureTime(insertionSort, arr, n);
+
+        generateSortedData(arr, n);
+        cout << "Selection Sort (Sorted Data): ";
+        measureTime(selectionSort, arr, n);
+
+        generateSortedData(arr, n);
+        cout << "Merge Sort (Sorted Data): ";
+        measureTime(mergeSort, arr, 0, n - 1);
+
+        generateSortedData(arr, n);
+        cout << "Quick Sort (Sorted Data): ";
+        measureTime(quickSort, arr, 0, n - 1);
+
+        delete[] arr;
+        cout << endl;
+    }
+    return 0;
+}
+
+
+
